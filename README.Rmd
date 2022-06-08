@@ -1,0 +1,15 @@
+---
+title: "Project 1"
+author: "Steph Camino"
+date: '2022-06-08'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+rmarkdown::render("README.Rmd",
+                  output_format = "github_document",
+                  output_options = list(html_preview = FALSE))
