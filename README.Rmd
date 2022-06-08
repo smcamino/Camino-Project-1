@@ -1,0 +1,68 @@
+---
+title: "Project 1"
+author: "Steph Camino"
+date: '2022-06-08'
+---
+
+```{r, include = FALSE}
+library(knitr)
+knitr::opts_chunk$set(fig.path = "~/images/")
+```
+
+# Required Packages
+```{r}
+library(httr)
+library(dbplyr)
+library(jsonlite)
+library(tidyverse)
+```
+
+
+# Food API Functions
+
+# Basic Exploratory Data Analysis
+
+## Data
+
+## Tables
+
+## Plots
+
+
+
+
+THIS IS FROM HW 5 DELETE WHEN DONE
+r6dkgZPsg9wTctOy0pRVe3Ldhgk7mjcHZGuJMeNc
+
+```{r, warning=FALSE}
+library(httr)
+
+# Connecting to news API about Apple
+try <- GET("https://api.nasa.gov/neo/rest/v1/feed?start_date=2022-06-01&end_date=2022-06-07&api_key=r6dkgZPsg9wTctOy0pRVe3Ldhgk7mjcHZGuJMeNc")
+```
+
+
+```{r, warning = FALSE}
+library(dbplyr)
+library(jsonlite)
+library(tidyverse)
+
+# Look for element wanted
+str(try, max.level = 1)
+
+# Grabbing List element we want and converts it to character
+parsed <- fromJSON(rawToChar(try$content))
+
+# Look for element wanted
+str(parsed, max.level = 1)
+
+# Looking at column names for parsed articles
+parsed$articles %>% colnames()
+
+# Create tibble of source, author, and title
+sourceAuthorTitle <- parsed$articles[1:3] %>% as_tibble()
+sourceAuthorTitle
+```
+
+
+

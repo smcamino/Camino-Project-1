@@ -1,5 +1,5 @@
-README.R
+Project 1
 ================
-scami
+Steph Camino
 2022-06-08
 
