@@ -4,6 +4,10 @@ author: "Steph Camino"
 date: '2022-06-08'
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ```{r, include = FALSE}
 library(knitr)
 knitr::opts_chunk$set(fig.path = "~/images/")
@@ -12,13 +16,14 @@ knitr::opts_chunk$set(fig.path = "~/images/")
 # Required Packages
 ```{r}
 library(httr)
-library(dbplyr)
+library(dplyr)
 library(jsonlite)
 library(tidyverse)
+library(lubridate)
 ```
 
 
-# Food API Functions
+# NASA API Functions
 
 # Basic Exploratory Data Analysis
 
@@ -31,27 +36,205 @@ library(tidyverse)
 
 
 
-THIS IS FROM HW 5 DELETE WHEN DONE
 r6dkgZPsg9wTctOy0pRVe3Ldhgk7mjcHZGuJMeNc
 
 ```{r, warning=FALSE}
-library(httr)
 
-# Connecting to news API about Apple
-try <- GET("https://api.nasa.gov/neo/rest/v1/feed?start_date=2022-06-01&end_date=2022-06-07&api_key=r6dkgZPsg9wTctOy0pRVe3Ldhgk7mjcHZGuJMeNc")
+# Connecting to NASA API about Asteroid Sightings
+APIData <- GET("https://api.nasa.gov/neo/rest/v1/feed?start_date=2022-06-01&end_date=2022-06-07&api_key=r6dkgZPsg9wTctOy0pRVe3Ldhgk7mjcHZGuJMeNc")
+```
+
+```{r}
+# Look for the element wanted, content
+str(APIData, max.level = 1)
+
+# Grabbing List element we want and converts it to character
+parsed <- fromJSON(rawToChar(APIData$content))
+
+# Grabs a list that includes every date, which includes the data
+near <- parsed$near_earth_objects
+```
+
+```{r}
+# This function is called when the user wants asteroid diameter in their dataset.
+# The type of diameter units and whether they want minimum diameter, maximum diameter, or both diameters must be chosen. 
+# Once diameter units and diameter choice is chosen, the function will grab it and insert it in the dataset.
+asteroidDiameter <- function(diameterData, diameterUnits = "ft", diameterChoice = "both"){
+  
+  # Converts imputed strings for diameterUnit and diameterChoice to lowercase.
+  diameterUnits <- tolower(diameterUnits)
+  diameterChoice <- tolower(diameterChoice)
+  
+  # Conditional that grabs diameter depending on the type of unit chosen. 
+  if(diameterUnits %in% "kilometers" || diameterUnits %in% "km"){
+    
+    diamUnit <- diameterData$kilometers
+    
+  } else if(diameterUnits %in% "meters" || diameterUnits %in% "m"){
+      
+      diamUnit <- diameterData$meters
+
+    } else if(diameterUnits %in% "miles" || diameterUnits %in% "mi"){
+        
+        diamUnit <- diameterData$miles
+
+      } else if(diameterUnits %in% "feet" || diameterUnits %in% "ft"){
+          
+          diamUnit <- diameterData$feet
+          
+        } else stop("DIAMETER UNITS: Units for diameter must be either kilometers, km, meters, m, miles, mi, feet, or ft")
+
+  # Conditional that grabs diameter minimum, diameter maximum, or both depending on what was chosen.
+  # This conditional uses the data grabbed from the above conditional, diamUnit. 
+  if(diameterChoice %in% "min" || diameterChoice %in% "minimum"){
+      
+    diamChoice <- diamUnit$estimated_diameter_min
+      
+  } else if(diameterChoice %in% "max" || diameterChoice %in% "maximum"){
+      
+      diamChoice <-  diamUnit$estimated_diameter_max
+
+    } else if(diameterChoice %in% "b" || diameterChoice %in% "both") {
+        
+        diamMin <- diamUnit$estimated_diameter_min
+        diamMax <-  diamUnit$estimated_diameter_max
+        diamChoice <- cbind(diamMin, diamMax) # Combines min and max variables
+
+      } else stop("DIAMETER CHOICE: The choice for diameter must be minimum, min, maximum, max, both, or b")
+  
+  # Returns diameter
+  return(diamChoice)                
+  
+}
+```
+
+```{r}
+asteroidData <- function(date = "01", id = "false", name = "false", magnitude = "false", diameter = "false", hazard = "false", diameterUnits, diameterChoice){
+  
+  # Conditional to grab data from the date chosen.
+  # This date is the date the asteroid's were seen.
+  # The date options are June 1, 2022 to June 7, 2022.
+  if(date %in% "01" || date %in% "1"){
+    dateData <- near$`2022-06-01`
+    dateChosen <- "2022-06-01"
+  } else if (date %in% "02" || date %in% "2") {
+      dateData <- near$`2022-06-02`
+      dateChosen <- "2022-06-02"
+    } else if (date %in% "03" || date %in% "3"){ 
+        dateData <- near$`2022-06-03`
+        dateChosen <- "2022-06-03"
+      } else if (date %in% "04" || date %in% "4") {
+          dateData <- near$`2022-06-04`
+          dateChosen <- "2022-06-04"
+        } else if (date %in% "05" || date %in% "5") {
+          dateData <- near$`2022-06-05`
+          dateChosen <- "2022-06-05"
+          } else if (date %in% "06" || date %in% "6") {
+            dateData <- near$`2022-06-06`
+            dateChosen <- "2022-06-06"
+          } else if (date %in% "07" || date %in% "7") {
+              dateData <- near$`2022-06-07`
+              dateChosen <- "2022-06-07"
+            } else {
+                stop("DATE: use either 01, 1, 02, 2, 03, 3, 04, 4, 05, 5, 06, 6, 07, or 7")
+              } 
+     
+  # Converts imputed function options to lowercase
+  id <- tolower(id)
+  name <- tolower(name)
+  magnitude <- tolower(magnitude)
+  diameter <- tolower(diameter)
+  hazard <- tolower(hazard)
+  
+  # Creates empty dataset with the same number of rows as the data found above in the date conditional. 
+  # This dataset will be used to insert all of the variables chosen for the final dataset.
+  projectData <- data.frame(matrix(nrow = nrow(dateData)))
+  
+  # Creates new variable date with date chosen in every row. Converts string to a date too.
+  projectData$date <- rep(ymd(dateChosen), nrow(dateData))
+  
+  # Conditional for Asteroid ID
+  # If false or f is chosen, skip entire conditional.
+  # If ID is chosen, add a new variable idData to projectData with all of the asteroid's IDs.
+  if(!((id %in% "false") || (id %in% "f"))){
+    if(id %in% "id"|| id %in% "idno"){
+      projectData$idData <- dateData$id
+    } else {
+        stop("ID: use either false, f, id, or idno")
+      }
+  }
+  
+  # Conditional for Asteroid Name
+  # If false or f is chosen, skip entire conditional.
+  # If Name is chosen, add a new variable nameData to projectData with all of the asteroid's names. 
+  if(!((name %in% "false") || (name %in% "f"))){
+    if(name %in% "name"|| name %in% "n"){
+      projectData$nameData <- dateData$name
+    } else {
+        stop("NAME: use either false, f, name, or n")
+      } 
+  }
+  
+  # Conditional for Asteroid absolute magnitude
+  # If false or f is chosen, skip entire conditional.
+  # If magnitude is chosen, add a new variable magData to projectData with all of the asteroid's absolute magnitude.  
+  if(!((magnitude %in% "false") || (magnitude %in% "f"))){
+    if(magnitude %in% "magnitude"|| magnitude %in% "m"){
+      projectData$magData <- dateData$absolute_magnitude_h
+    } else {
+        stop("MAGNITUDE: use either false, f, magnitude, or m")
+      }
+  }
+  
+  # Conditional for Asteroid diameter
+  # If false or f is chosen, skip entire conditional.
+  # If diameter is chosen, grab the estimated diameter data from dateData, call the function ateroidDiameter, and add a new variable asterDiam or minDiam and max diam to projectData  depending on if min, max, or both is chosen with all of the asteroid's diameters. 
+  if(!((diameter %in% "false") || (diameter %in% "f"))){
+    if(diameter %in% "diameter"|| diameter %in% "d"){
+      diameterData <- dateData$estimated_diameter
+      asterDiam <- asteroidDiameter(diameterData, diameterUnits, diameterChoice)
+      projectData <- cbind(projectData, asterDiam)
+    } 
+      else {
+        stop("DIAMETER: use either false, f, diameter, or d")
+      } 
+  }  
+  
+  # Conditional for if the Asteroid is potentially hazardous
+  # If false or f is chosen, skip entire conditional.
+  # If Hazard is chosen, add a new variable hazardData to projectData with TRUE/FALSE if the asteroid is hazardous or not.   
+  if(!((hazard %in% "false") || (hazard %in% "f"))){
+    if(hazard %in% "hazard"|| hazard %in% "h") {
+      projectData$hazardData <- dateData$is_potentially_hazardous_asteroid
+    } else {
+        stop("HAZARD: use either false, f, hazard, or h")
+      }
+  }
+  
+  # Deletes the first column, which is the empty column created when we created the empty dataset. 
+  projectData <- subset(projectData, select = -1)
+  
+  # Returns projectData
+  return(projectData)
+}
+```
+
+```{r}
+# Grabs data from June 1, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and mas, in feet, and if it is Hazardous or not.
+juneFirst <- asteroidData(date = "01", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Grabs data from June 6, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and mas, in feet, and if it is Hazardous or not.
+juneSixth <- asteroidData(date = "06", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Combines data from June 1, 2022 and June 6, 2022
+june <- rbind(juneFirst, juneSixth)
+
+# Creates new variable that is the range of possible diameters of the asteroid
+june$dimRange <- june$diamMax - june$diamMin
 ```
 
 
-```{r, warning = FALSE}
-library(dbplyr)
-library(jsonlite)
-library(tidyverse)
-
-# Look for element wanted
-str(try, max.level = 1)
-
-# Grabbing List element we want and converts it to character
-parsed <- fromJSON(rawToChar(try$content))
+```{r}
 
 # Look for element wanted
 str(parsed, max.level = 1)
@@ -63,6 +246,4 @@ parsed$articles %>% colnames()
 sourceAuthorTitle <- parsed$articles[1:3] %>% as_tibble()
 sourceAuthorTitle
 ```
-
-
 
