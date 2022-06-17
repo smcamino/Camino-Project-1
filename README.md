@@ -1,9 +1,46 @@
-Project 1
+Interacting with APIs: NASA API
 ================
 Steph Camino
 2022-06-08
 
+Welcome! This is project 1 for St558 at NC State! Here you will see a
+vignette I have created about contacting a [NASA
+API](https://api.nasa.gov/index.html#browseAPI) using functions I wrote
+to query, parse, and return data. At the end will be a small exploratory
+analysis on the data I returned from the functions I created.
+
+The data we will be exploring from NASA is from NeoWs (Near Earth Object
+Web Service), which gathers data every day from Asteroids near earth.
+
 # Required Packages
+
+Before interacting with the API, I had to load some R packages to gain
+access to some functions.
+
+## Libraries Used:
+
+-   [httr](https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html):
+    I used `GET()` from this package to access the NASA API.  
+-   [jsonlite](https://cran.r-project.org/web/packages/jsonlite/index.html):
+    I used `fromJSON()` from this package which reads data from file
+    path or character string and converts and simplifies it to an R
+    object.  
+-   [tidyverse](https://www.tidyverse.org/): “TidyVerse” is a collection
+    of R packages that share common philosophies and are designed to
+    work together. “dplyr” is one of the collection of R packages that
+    is also loaded when loading “TidyVerse.” From “dplyr,” `as_tibble()`
+    is used to convert the data frame to a tibble. `group_by()` is also
+    from “dplyr,” it groups rows by a variable. Also from “dplyr,”
+    `summarise()` is used to apply basic functions to data. Another
+    package I used from “TidyVerse” is “ggplot2” and from this package I
+    used `ggplot()` to create the plots.  
+-   [lubridate](https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html):
+    I used `ymd()` from this package to convert a string to a date.  
+-   [knitr](https://www.r-project.org/nosvn/pandoc/knitr.html): I used
+    `opts_chunk$set()` from the “knitr” package to set a path for the
+    images created to be saved at. This is used so the images will show
+    up on GitHub. If you can see the plots at the end of this page that
+    means it worked!
 
 ``` r
 library(httr)
@@ -11,19 +48,20 @@ library(dplyr)
 library(jsonlite)
 library(tidyverse)
 library(lubridate)
+library(knitr)
 ```
 
-# NASA API Functions
+# NASA API Interaction Functions
 
-# Basic Exploratory Data Analysis
+This section includes the functions I wrote which interacts with the
+[NASA API](https://api.nasa.gov/index.html#browseAPI), specifically the
+Asteroids NeoWs (Near Earth Object Web Service), to create a dataset of
+near-earth asteroids.
 
-## Data
+## Setup
 
-## Tables
-
-## Plots
-
-r6dkgZPsg9wTctOy0pRVe3Ldhgk7mjcHZGuJMeNc
+This subsection connects to the API and grabs information used to create
+the data in the following functions.
 
 ``` r
 # Connecting to NASA API about Asteroid Sightings
@@ -32,26 +70,8 @@ APIData <- GET("https://api.nasa.gov/neo/rest/v1/feed?start_date=2022-06-01&end_
 
 ``` r
 # Look for the element wanted, content
-str(APIData, max.level = 1)
-```
+#str(APIData, max.level = 1)
 
-    ## List of 10
-    ##  $ url        : chr "https://api.nasa.gov/neo/rest/v1/feed?start_date=2022-06-01&end_date=2022-06-07&api_key=r6dkgZPsg9wTctOy0pRVe3L"| __truncated__
-    ##  $ status_code: int 200
-    ##  $ headers    :List of 18
-    ##   ..- attr(*, "class")= chr [1:2] "insensitive" "list"
-    ##  $ all_headers:List of 1
-    ##  $ cookies    :'data.frame': 0 obs. of  7 variables:
-    ##  $ content    : raw [1:79772] 7b 22 6c 69 ...
-    ##  $ date       : POSIXct[1:1], format: "2022-06-16 21:08:27"
-    ##  $ times      : Named num [1:6] 0 0.000099 0.000102 0.00027 0.022808 ...
-    ##   ..- attr(*, "names")= chr [1:6] "redirect" "namelookup" "connect" "pretransfer" ...
-    ##  $ request    :List of 7
-    ##   ..- attr(*, "class")= chr "request"
-    ##  $ handle     :Class 'curl_handle' <externalptr> 
-    ##  - attr(*, "class")= chr "response"
-
-``` r
 # Grabbing List element we want and converts it to character
 parsed <- fromJSON(rawToChar(APIData$content))
 
@@ -59,58 +79,63 @@ parsed <- fromJSON(rawToChar(APIData$content))
 near <- parsed$near_earth_objects
 ```
 
-``` r
-# This function is called when the user wants asteroid diameter in their dataset.
-# The type of diameter units and whether they want minimum diameter, maximum diameter, or both diameters must be chosen. 
-# Once diameter units and diameter choice is chosen, the function will grab it and insert it in the dataset.
-asteroidDiameter <- function(diameterData, diameterUnits = "ft", diameterChoice = "both"){
-  
-  # Converts imputed strings for diameterUnit and diameterChoice to lowercase.
-  diameterUnits <- tolower(diameterUnits)
-  diameterChoice <- tolower(diameterChoice)
-  
-  # Conditional that grabs diameter depending on the type of unit chosen. 
-  if(diameterUnits %in% "kilometers" || diameterUnits %in% "km"){
-    
-    diamUnit <- diameterData$kilometers
-    
-  } else if(diameterUnits %in% "meters" || diameterUnits %in% "m"){
-      
-      diamUnit <- diameterData$meters
+## `asteroidData` Function
 
-    } else if(diameterUnits %in% "miles" || diameterUnits %in% "mi"){
-        
-        diamUnit <- diameterData$miles
+This function creates your asteroid dataset!
 
-      } else if(diameterUnits %in% "feet" || diameterUnits %in% "ft"){
-          
-          diamUnit <- diameterData$feet
-          
-        } else stop("DIAMETER UNITS: Units for diameter must be either kilometers, km, meters, m, miles, mi, feet, or ft")
+There are many options to choose from, including Date, ID, Names,
+Absolute Magnitude, Diameter (Diameter Unit and Diameter Choice), and
+Potential Hazard.
 
-  # Conditional that grabs diameter minimum, diameter maximum, or both depending on what was chosen.
-  # This conditional uses the data grabbed from the above conditional, diamUnit. 
-  if(diameterChoice %in% "min" || diameterChoice %in% "minimum"){
-      
-    diamChoice <- diamUnit$estimated_diameter_min
-      
-  } else if(diameterChoice %in% "max" || diameterChoice %in% "maximum"){
-      
-      diamChoice <-  diamUnit$estimated_diameter_max
+Note: The function options in the quotation marks are not case sensitive
+so there’s no worries about that!
 
-    } else if(diameterChoice %in% "b" || diameterChoice %in% "both") {
-        
-        diamMin <- diamUnit$estimated_diameter_min
-        diamMax <-  diamUnit$estimated_diameter_max
-        diamChoice <- cbind(diamMin, diamMax) # Combines min and max variables
+**To use function:** `asteroidData(FILL IN HERE WITH OPTIONS BELOW)`
 
-      } else stop("DIAMETER CHOICE: The choice for diameter must be minimum, min, maximum, max, both, or b")
-  
-  # Returns diameter
-  return(diamChoice)                
-  
-}
-```
+-   **DATE:** What date you want the data to be from.
+    -   You **must** choose a date from June 01, 2022 to June 07,
+        2022.  
+    -   Example: `date = "01"` or `date = "1"` to grab data from June
+        01, 2022.  
+-   **ID:** Includes the IDs of the asteroids.
+    -   Example: `id = "id"` or `id = "idno"`  
+    -   If you do not want ID you may use `"f"` or `"false"` in place of
+        the quoted option or leave the entire statement out instead.  
+-   **NAMES:** Includes the Names of the asteroids.
+    -   Example: `name = "name"` or `name = "n"`  
+    -   If you do not want Name you may use `"f"` or `"false"` in place
+        of the quoted option or leave the entire statement out
+        instead.  
+-   **ABSOLUTE MAGNITUDE:** Includes the Absolute Magnitudes of the
+    asteroids.
+    -   Example: `magnitude = "magnitude"` or `magnitude = "m"`  
+    -   If you do not want Absolute Magnitude you may use `"f"` or
+        `"false"` in place of the quoted option or leave the entire
+        statement out instead.  
+-   **DIAMETER:** Includes the Diameters of the asteroids.
+    -   Example: `diameter = "diameter"` or `diameter = "d"`  
+    -   If you want Diameter to be chosen in your dataset, you also must
+        choose the units and if you want the minimum estimated diameter,
+        maximum estimated diameter, or both.
+        -   Example:
+            -   `diameterUnit = "kilometer"` or `diameterUnit = "km"`
+            -   `diameterUnit = "meter"` or `diameterUnit = "m"`
+            -   `diameterUnit = "miles"` or `diameterUnit = "mi"`
+            -   `diameterUnit = "feet"` or `diameterUnit = "ft"`
+        -   Example:
+            -   `diameterChoice = "minimum"` or `diameterChoice = "min"`
+            -   `diameterChoice = "maximum"` or `diameterChoice = "max"`
+            -   `diameterChoice = "both"` or `diameterChoice = "b"`
+    -   If you do not want Diameter you may use `"f"` or `"false"` in
+        place of the quoted option or leave the entire statement out
+        instead. Leave out `diameterUnits =` and `diameterChoice =` as
+        well.  
+-   **POTENTIAL HAZARD:** Includes if the asteroids are Potentially
+    Hazardous or not.
+    -   Example: `hazard = "hazard"` or `hazard = "h"`  
+    -   If you do not want Potential Hazard you may use `"f"` or
+        `"false"` in place of the quoted option or leave the entire
+        statement out instead.
 
 ``` r
 asteroidData <- function(date = "01", id = "false", name = "false", magnitude = "false", diameter = "false", hazard = "false", diameterUnits, diameterChoice){
@@ -223,15 +248,111 @@ asteroidData <- function(date = "01", id = "false", name = "false", magnitude = 
 }
 ```
 
+## `asteroidDiameter` Function
+
+This function gets information for the diameter of the asteroids. It is
+called in the `asteroidData` function above when the user specifies if
+they want to include diameter in their data.
+
 ``` r
-# Grabs data from June 1, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and mas, in feet, and if it is Hazardous or not.
+# This function is called when the user wants asteroid diameter in their dataset.
+# The type of diameter units and whether they want minimum diameter, maximum diameter, or both diameters must be chosen. 
+# Once diameter units and diameter choice is chosen, the function will grab it and insert it in the dataset.
+asteroidDiameter <- function(diameterData, diameterUnits = "ft", diameterChoice = "both"){
+  
+  # Converts imputed strings for diameterUnit and diameterChoice to lowercase.
+  diameterUnits <- tolower(diameterUnits)
+  diameterChoice <- tolower(diameterChoice)
+  
+  # Conditional that grabs diameter depending on the type of unit chosen. 
+  if(diameterUnits %in% "kilometers" || diameterUnits %in% "km"){
+    
+    diamUnit <- diameterData$kilometers
+    
+  } else if(diameterUnits %in% "meters" || diameterUnits %in% "m"){
+      
+      diamUnit <- diameterData$meters
+
+    } else if(diameterUnits %in% "miles" || diameterUnits %in% "mi"){
+        
+        diamUnit <- diameterData$miles
+
+      } else if(diameterUnits %in% "feet" || diameterUnits %in% "ft"){
+          
+          diamUnit <- diameterData$feet
+          
+        } else stop("DIAMETER UNITS: Units for diameter must be either kilometers, km, meters, m, miles, mi, feet, or ft")
+
+  # Conditional that grabs diameter minimum, diameter maximum, or both depending on what was chosen.
+  # This conditional uses the data grabbed from the above conditional, diamUnit. 
+  if(diameterChoice %in% "min" || diameterChoice %in% "minimum"){
+      
+    diamChoice <- diamUnit$estimated_diameter_min
+      
+  } else if(diameterChoice %in% "max" || diameterChoice %in% "maximum"){
+      
+      diamChoice <-  diamUnit$estimated_diameter_max
+
+    } else if(diameterChoice %in% "b" || diameterChoice %in% "both") {
+        
+        diamMin <- diamUnit$estimated_diameter_min
+        diamMax <-  diamUnit$estimated_diameter_max
+        diamChoice <- cbind(diamMin, diamMax) # Combines min and max variables
+
+      } else stop("DIAMETER CHOICE: The choice for diameter must be minimum, min, maximum, max, both, or b")
+  
+  # Returns diameter
+  return(diamChoice)                
+  
+}
+```
+
+# Basic Exploratory Data Analysis
+
+## Data
+
+Lets take a look at some of the data that gets outputted from the
+functions mentioned above.
+
+I took the data from each day, June 01, 2022 to June 07, 2022, and
+combined them. This data included the asteroid’s ID, Name, Absolute
+Magnitude, Diameter, both minimum and maximum, in feet, and if it is
+Hazardous or not.
+
+I also created two new variables here. The first variable I created is
+the range of the estimated diameter by taking the minimum estimated
+diameter and subtracting it from the maximum estimated diameter. Then I
+categorized the range from “Low”, “Medium”, to “High”. All asteroids
+with a diameter range less than the first quartile is considered a “Low”
+range. The asteroids with a diameter range greater than the first
+quartile and and less than the third quartile is considered a “Medium”
+range. Lastly, the asteroids with a diameter range greater than the
+third quartile is considered a “High” range.
+
+``` r
+# Grabs data from June 1, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
 juneFirst <- asteroidData(date = "01", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
 
-# Grabs data from June 6, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and mas, in feet, and if it is Hazardous or not.
+# Grabs data from June 2, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
+juneSecond <- asteroidData(date = "02", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Grabs data from June 3, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
+juneThird <- asteroidData(date = "03", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Grabs data from June 4, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
+juneFourth <- asteroidData(date = "04", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Grabs data from June 5, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
+juneFifth <- asteroidData(date = "05", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Grabs data from June 6, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
 juneSixth <- asteroidData(date = "06", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
 
-# Combines data from June 1, 2022 and June 6, 2022
-june <- rbind(juneFirst, juneSixth)
+# Grabs data from June 7, 2022 with the asteroid's ID, Name, Magnitude, Diameter, both min and max, in feet, and if it is Hazardous or not.
+juneSeventh <- asteroidData(date = "07", id = "id", name = "name", magnitude = "m", diameter = "d", hazard = "h", diameterUnits = "ft", diameterChoice = "b")
+
+# Combines data from June 1, 2022 through June 7, 2022
+june <- rbind(juneFirst, juneSecond, juneThird, juneFourth, juneFifth, juneSixth, juneSeventh)
 
 # Creates new variable that is the range of possible diameters of the asteroid
 june$diamRange <- june$diamMax - june$diamMin
@@ -240,7 +361,36 @@ june$diamRange <- june$diamMax - june$diamMin
 june$diamRangeCategory <- ifelse(june$diamRange < quantile(june$diamRange, 0.25), "low",
                                   ifelse(june$diamRange < quantile(june$diamRange, 0.75), "medium", "high"))
 june$diamRangeCategory <- ordered(june$diamRangeCategory, levels = c("high", "medium", "low"))
+
+# Covert the dataset june from data frame to tibble. This helps printing quality and usability. 
+june <- as_tibble(june)
+june
 ```
+
+    ## # A tibble: 68 x 9
+    ##    date       idData  nameData magData diamMin diamMax hazardData diamRange
+    ##    <date>     <chr>   <chr>      <dbl>   <dbl>   <dbl> <lgl>          <dbl>
+    ##  1 2022-06-01 2163692 163692 ~    18.3  1943.   4345.  FALSE         2402. 
+    ##  2 2022-06-01 2510529 510529 ~    21.7   399.    891.  TRUE           493. 
+    ##  3 2022-06-01 2523813 523813 ~    20.6   646.   1446.  TRUE           799. 
+    ##  4 2022-06-01 3092391 (2001 U~    19.3  1204.   2692.  FALSE         1488. 
+    ##  5 2022-06-01 3370167 (2007 E~    21.4   458.   1023.  TRUE           566. 
+    ##  6 2022-06-01 3475231 (2009 V~    22.7   252.    562.  FALSE          311. 
+    ##  7 2022-06-01 3666539 (2014 F~    26.6    41.7    93.3 FALSE           51.6
+    ##  8 2022-06-01 3734563 (2015 V~    25.6    66.2   148.  FALSE           81.8
+    ##  9 2022-06-01 3735684 (2015 X~    23.4   182.    407.  FALSE          225. 
+    ## 10 2022-06-01 3746620 (2016 E~    23.4   182.    407.  FALSE          225. 
+    ## # ... with 58 more rows, and 1 more variable: diamRangeCategory <ord>
+
+## Tables
+
+In this section we will look at some different tables of the asteroid
+data we created in the above section.
+
+Here I created a contingency table to look at how many asteroids were
+potentially Hazardous or not. The majority of asteroids aren’t Hazardous
+but it appears that there’s a little over 1 Hazardous asteroid per day,
+on average.
 
 ``` r
 table(june$hazardData)
@@ -248,7 +398,12 @@ table(june$hazardData)
 
     ## 
     ## FALSE  TRUE 
-    ##    27     7
+    ##    59     9
+
+Here I created a two-way contingency table to look at how many asteroids
+were potentially Hazardous or not on each date. June 1st and June 6th
+had more Hazardous asteroids than all of the other days but those days
+had significantly more near-earth asteroids to begin with.
 
 ``` r
 table(june$date, june$hazardData)
@@ -257,7 +412,19 @@ table(june$date, june$hazardData)
     ##             
     ##              FALSE TRUE
     ##   2022-06-01    14    4
+    ##   2022-06-02     4    0
+    ##   2022-06-03     8    1
+    ##   2022-06-04     9    0
+    ##   2022-06-05     6    0
     ##   2022-06-06    13    3
+    ##   2022-06-07     5    1
+
+Here I created a three-way contingency table to look at how many
+asteroids were potentially Hazardous or not on each date depending on if
+the Range of the minimum and maximum estimated Diameters were low,
+medium, or high. We can see here that the majority of hazardous
+asteroids have a high estimated Diameter Range. I wonder why we can’t
+estimate the size of potentially hazardous asteroids?
 
 ``` r
 table(june$date, june$hazardData, june$diamRangeCategory)
@@ -267,36 +434,72 @@ table(june$date, june$hazardData, june$diamRangeCategory)
     ## 
     ##             
     ##              FALSE TRUE
-    ##   2022-06-01     2    2
-    ##   2022-06-06     3    2
+    ##   2022-06-01     2    4
+    ##   2022-06-02     0    0
+    ##   2022-06-03     2    1
+    ##   2022-06-04     1    0
+    ##   2022-06-05     1    0
+    ##   2022-06-06     3    3
+    ##   2022-06-07     0    0
     ## 
     ## , ,  = medium
     ## 
     ##             
     ##              FALSE TRUE
-    ##   2022-06-01     6    2
-    ##   2022-06-06     7    1
+    ##   2022-06-01     9    0
+    ##   2022-06-02     2    0
+    ##   2022-06-03     4    0
+    ##   2022-06-04     4    0
+    ##   2022-06-05     2    0
+    ##   2022-06-06     8    0
+    ##   2022-06-07     4    1
     ## 
     ## , ,  = low
     ## 
     ##             
     ##              FALSE TRUE
-    ##   2022-06-01     6    0
-    ##   2022-06-06     3    0
+    ##   2022-06-01     3    0
+    ##   2022-06-02     2    0
+    ##   2022-06-03     2    0
+    ##   2022-06-04     4    0
+    ##   2022-06-05     3    0
+    ##   2022-06-06     2    0
+    ##   2022-06-07     1    0
+
+Here I looked at the spread of the range of the estimated Diameter in
+feet. As you can see, there is a big difference from the minimum to the
+maximum. This shows that some asteroids are more difficult to determine
+their size than others. The first and third quartiles were used in
+previous code to create the bounds when categorizing diameter range into
+low, medium, and high.
 
 ``` r
 summary(june$diamRange)
 ```
 
-    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   32.55  121.04  198.02  584.48  578.89 5183.01
+    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    ##    8.843   71.437  166.183  427.076  476.068 5183.014
+
+Here I looked at the spread of the Absolute Magnitude (H) of the
+asteroids. [Center for Near Earth Object
+Studies](https://cneos.jpl.nasa.gov/glossary/h.html) defines Absolute
+Magnitude, if I understood correctly, as a visual measurement of how far
+away the asteroid is away from the sun at a zero phase angle. The range
+of Absolute Magnitude isn’t very large, which makes sense since these
+are near-earth asteroids so they should be similar distances away from
+the sun.
 
 ``` r
 summary(june$magData)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   16.59   21.35   23.70   23.13   24.75   27.60
+    ##   16.59   21.77   24.06   23.86   25.90   30.43
+
+Here I created a table with mean, median, and variance of Absolute
+Magnitude (H) grouped by if the asteroids were Hazardous or not. Here we
+can see that asteroids that aren’t Hazardous have larger averages and
+medians, but the variability is larger as well.
 
 ``` r
 june %>% group_by(hazardData) %>%
@@ -306,24 +509,48 @@ june %>% group_by(hazardData) %>%
     ## # A tibble: 2 x 4
     ##   hazardData   avg   med   var
     ##   <lgl>      <dbl> <dbl> <dbl>
-    ## 1 FALSE       23.8  24.3  6.80
-    ## 2 TRUE        20.6  21.3  3.24
+    ## 1 FALSE       24.3  24.4  7.54
+    ## 2 TRUE        20.7  21.3  2.65
+
+Here I created a table with mean, median, and variance of Absolute
+Magnitude (H) grouped by if the asteroids were Hazardous or not along if
+the range of the diameter was low, medium, or high. This table doesn’t
+tell us much as there is only one Hazardous asteroid with a medium
+diameter range, this is why there is a `NA` for variance, and there are
+zero Hazardous asteroids with low diameter range. But low diameter
+range, Non-Hazardous asteroids have larger mean and median Absolute
+Magnitudes than the other categories.
+
+# **FIX THE COMMENT IN THIS LINE OF CODE!!!**
 
 ``` r
-june %>% group_by(date, hazardData) %>%
+june %>% group_by(diamRangeCategory, hazardData) %>%
      summarise(avg = mean(magData), med = median(magData), var = var(magData))
 ```
 
-    ## `summarise()` has grouped output by 'date'. You can override using the `.groups` argument.
+    ## `summarise()` has grouped output by 'diamRangeCategory'. You can override
+    ## using the `.groups` argument.
 
-    ## # A tibble: 4 x 5
-    ## # Groups:   date [2]
-    ##   date       hazardData   avg   med   var
-    ##   <date>     <lgl>      <dbl> <dbl> <dbl>
-    ## 1 2022-06-01 FALSE       24.2  24.4 7.49 
-    ## 2 2022-06-01 TRUE        21.3  21.4 0.197
-    ## 3 2022-06-06 FALSE       23.4  24.3 6.28 
-    ## 4 2022-06-06 TRUE        19.7  21.2 7.34
+    ## # A tibble: 5 x 5
+    ## # Groups:   diamRangeCategory [3]
+    ##   diamRangeCategory hazardData   avg   med    var
+    ##   <ord>             <lgl>      <dbl> <dbl>  <dbl>
+    ## 1 high              FALSE       19.8  19.7  0.910
+    ## 2 high              TRUE        20.6  21.3  2.78 
+    ## 3 medium            FALSE       23.9  24.1  1.49 
+    ## 4 medium            TRUE        22    22   NA    
+    ## 5 low               FALSE       27.5  27.2  1.34
+
+## Plots
+
+In this section we will look at some plots using the asteroid data.
+
+This plot is a bar graph of the frequency of asteroids that are either
+Hazardous or not and have low medium or high Diameter ranges. It appears
+that the majority of Non-Hazardous asteroids are semi-hard to predict
+their size and the majority of Hazardous asteroids are very hard to
+predict their size. Unfortunately, there is no data for Hazardous
+asteroids with low Diameter range.
 
 ``` r
 g <- ggplot(data = june, aes(x = diamRangeCategory))
@@ -333,50 +560,73 @@ g + geom_bar(aes(fill = hazardData), position = "dodge") +
   scale_fill_discrete(name = "Hazardous", labels = c("No", "Yes"))
 ```
 
-![](~/images/unnamed-chunk-217-1.png)<!-- -->
+![](~/images/unnamed-chunk-73-1.png)<!-- -->
+
+Below is a histogram of the frequency of Absolute Aagnitude of the
+asteroids. It appears that this data has a normal distribution, which is
+interesting.
 
 ``` r
 g2 <- ggplot(june, aes(x = magData))
 g2 + geom_histogram(color = "black", fill = "red", size = 1, binwidth = 2) + 
-  labs(x = "Magnitude (au)", title = "Histogram of Asteroid's Absolute Magnitude")
+  labs(x = "Magnitude (H)", title = "Histogram of Asteroid's Absolute Magnitude")
 ```
 
-![](~/images/unnamed-chunk-218-1.png)<!-- -->
+![](~/images/unnamed-chunk-74-1.png)<!-- -->
+
+Below is a histogram with a kernel smoother layered on top. This graph
+is showing the density of Absolute Magnitude categorized by Diameter
+Range. its interesting that the densities of high, medium, and low are
+shifted over Absolute Magnitude.
 
 ``` r
-g2 + geom_histogram(aes(y = ..density.., fill = diamRangeCategory)) +
+g2 + geom_histogram(aes(y = ..density.., fill = diamRangeCategory), binwidth = 1) +
   geom_density(adjust = 0.5, alpha = 0.5, aes(fill = diamRangeCategory)) +
-  labs(x = "Absolute Magnitude (au)", title = "Histogram + Kernel Smoother of an Asteroid's Magnitude by Diameter Range") +
+  labs(x = "Absolute Magnitude (H)", title = "Histogram + Kernel Smoother of an Asteroid's Magnitude by Diameter Range") +
   scale_fill_discrete(name = "Diameter Range (ft)", labels = c("High", "Medium", "Low"))
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+![](~/images/unnamed-chunk-75-1.png)<!-- -->
 
-![](~/images/unnamed-chunk-218-2.png)<!-- -->
+Below is a scatter plot of asteroid Absolute Magnitude by Diameter
+Range. There appears to be a negative exponential trend with very little
+variability.
+
+# **FIX THE COMMENT IN THIS LINE OF CODE!!!**
 
 ``` r
 g3 <- ggplot(june, aes(x = magData, y = diamRange))
 
 g3 + geom_point() + 
   geom_smooth() + 
-  labs(x = "Absolute Magnitude (au)", y = "Diameter Range (ft)", title = "Astroid Magnitude by Range") 
+  labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
     ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
 
-![](~/images/unnamed-chunk-219-1.png)<!-- -->
+![](~/images/unnamed-chunk-76-1.png)<!-- -->
+
+Here I was having a little fun with the data points in the graph above.
+Each data point is its ID number. It’s not a very appealing graph as
+there are a lot of data points near each other so the IDs get a little
+jumbled. I thought I’d include it for fun.
 
 ``` r
 g3 + geom_text(aes(label = idData, angle = 90)) + 
-  labs(x = "Absolute Magnitude (au)", y = "Diameter Range (ft)", title = "Astroid Magnitude by Range") 
+  labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-![](~/images/unnamed-chunk-219-2.png)<!-- -->
+![](~/images/unnamed-chunk-77-1.png)<!-- -->
+
+Below is a boxplot of Absolute Magnitude of Hazardous and Non-Hazardous
+asteroids. It appears that Absolute Magnitude of asteroids are larger
+for Non-Hazardous asteroids versus Hazardous asteroids. This may be due
+to a lack of data for Hazardous asteroids.
 
 ``` r
 g4 <- ggplot(june, aes(x = hazardData, y = magData))
 g4 + geom_boxplot(fill = "blue", alpha = 0.5) + 
-  labs(x = "Potentially Hazardous", y = "Absolute Magnitude (au)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
+  labs(x = "Potentially Hazardous", y = "Absolute Magnitude (H)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
 ```
 
-![](~/images/unnamed-chunk-220-1.png)<!-- -->
+![](~/images/unnamed-chunk-78-1.png)<!-- -->
