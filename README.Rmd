@@ -422,3 +422,4 @@ g4 <- ggplot(june, aes(x = hazardData, y = magData))
 g4 + geom_boxplot(fill = "blue", alpha = 0.5) + 
   labs(x = "Potentially Hazardous", y = "Absolute Magnitude (H)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
 ```
+Congratulations! You've made it to the end of the vignette! I hope you enjoyed it and learned a little bit about asteroids. As they say in Looney Tunes, "That's all folks!"
