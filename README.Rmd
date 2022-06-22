@@ -5,16 +5,7 @@ author: "Steph Camino"
 date: '2022-06-08'
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r, include = FALSE}
-library(knitr)
-knitr::opts_chunk$set(fig.path = "~/images/")
-```
-
-Welcome! This is project 1 for St558 at NC State! Here you will see a vignette I have created about contacting a [NASA API](https://api.nasa.gov/index.html#browseAPI) using functions I wrote to query, parse, and return data. At the end will be a small exploratory analysis on the data I returned from the functions I created.  
+Welcome! This is project 1 for St558 at NC State! Here you will see a vignette I have created about contacting [NASA API](https://api.nasa.gov/index.html#browseAPI) using functions I wrote to query, parse, and return data. At the end will be a small exploratory analysis on the data I returned from the functions I created.  
 
 The data we will be exploring from NASA is from NeoWs (Near Earth Object Web Service), which gathers data every day from Asteroids near earth.
 
@@ -30,7 +21,7 @@ Before interacting with the API, I had to load some R packages to gain access to
 * [lubridate](https://cran.r-project.org/web/packages/lubridate/vignettes/lubridate.html): I used `ymd()` from this package to convert a string to a date.  
 * [knitr](https://www.r-project.org/nosvn/pandoc/knitr.html): I used `opts_chunk$set()` from the "knitr" package to set a path for the images created to be saved at. This is used so the images will show up on GitHub. If you can see the plots at the end of this page that means it worked!  
 
-```{r}
+```{r, warning = FALSE, comment = FALSE}
 library(httr)
 library(dplyr)
 library(jsonlite)
@@ -39,6 +30,16 @@ library(lubridate)
 library(knitr)
 ```
 
+```{r setup, include=FALSE}
+# Default
+knitr::opts_chunk$set(echo = TRUE)
+
+# This fixes comment made by line 368
+options(dplyr.summarise.inform = FALSE)
+
+# This saves the plots created to the images file so they will load in gitHub
+knitr::opts_chunk$set(fig.path = "~/Images/")
+```
 
 # NASA API Interaction Functions
 
@@ -362,8 +363,6 @@ june %>% group_by(hazardData) %>%
 
 Here I created a table with mean, median, and variance of Absolute Magnitude (H) grouped by if the asteroids were Hazardous or not along if the range of the diameter was low, medium, or high. This table doesn't tell us much as there is only one Hazardous asteroid with a medium diameter range, this is why there is a `NA` for variance, and there are zero Hazardous asteroids with low diameter range. But low diameter range, Non-Hazardous asteroids have larger mean and median Absolute Magnitudes than the other categories.  
 
-# **FIX THE COMMENT IN THIS LINE OF CODE!!!**
-
 ```{r}
 june %>% group_by(diamRangeCategory, hazardData) %>%
      summarise(avg = mean(magData), med = median(magData), var = var(magData))
@@ -404,13 +403,11 @@ g2 + geom_histogram(aes(y = ..density.., fill = diamRangeCategory), binwidth = 1
 
 Below is a scatter plot of asteroid Absolute Magnitude by Diameter Range. There appears to be a negative exponential trend with very little variability. 
 
-# **FIX THE COMMENT IN THIS LINE OF CODE!!!**
-
 ```{r}
 g3 <- ggplot(june, aes(x = magData, y = diamRange))
 
 g3 + geom_point() + 
-  geom_smooth() + 
+  geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
