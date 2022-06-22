@@ -30,7 +30,7 @@ library(lubridate)
 library(knitr)
 ```
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 # Default
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = TRUE)
 options(dplyr.summarise.inform = FALSE)
 
 # This saves the plots created to the images file so they will load in gitHub
-knitr::opts_chunk$set(fig.path = "~/Images/")
+#knitr::opts_chunk$set(fig.path = "~/Images/")
 ```
 
 # NASA API Interaction Functions
@@ -328,18 +328,18 @@ In this section we will look at some different tables of the asteroid data we cr
 Here I created a contingency table to look at how many asteroids were potentially Hazardous or not. The majority of asteroids aren't Hazardous but it appears that there's a little over 1 Hazardous asteroid per day, on average.   
 
 ```{r}
-table(june$hazardData)
+knitr::kable(table(june$hazardData), caption = paste("Counts for Hazardous and Non-Hazardous Asteroids"))
 ```
 Here I created a two-way contingency table to look at how many asteroids were potentially Hazardous or not on each date. June 1st and June 6th had more Hazardous asteroids than all of the other days but those days had significantly more near-earth asteroids to begin with. 
 
 ```{r}
-table(june$date, june$hazardData)
+knitr::kable(table(june$date, june$hazardData), caption = paste("Counts of Hazardous and Non-Hazardous Asteroids Each Day"))
 ```
 
 Here I created a three-way contingency table to look at how many asteroids were potentially Hazardous or not on each date depending on if the Range of the minimum and maximum estimated Diameters were low, medium, or high. We can see here that the majority of hazardous asteroids have a high estimated Diameter Range. I wonder why we can't estimate the size of potentially hazardous asteroids?   
 
 ```{r}
-table(june$date, june$hazardData, june$diamRangeCategory)
+knitr::kable(table(june$date, june$hazardData, june$diamRangeCategory), caption = paste("Counts of Hazardous and Non-Hazardous Asteroids Each Day for High, Medium, and Low Estimated Diameter Range"))
 ```
 
 Here I looked at the spread of the range of the estimated Diameter in feet. As you can see, there is a big difference from the minimum to the maximum. This shows that some asteroids are more difficult to determine their size than others. The first and third quartiles were used in previous code to create the bounds when categorizing diameter range into low, medium, and high. 
@@ -425,4 +425,3 @@ g4 <- ggplot(june, aes(x = hazardData, y = magData))
 g4 + geom_boxplot(fill = "blue", alpha = 0.5) + 
   labs(x = "Potentially Hazardous", y = "Absolute Magnitude (H)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
 ```
-

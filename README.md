@@ -45,48 +45,9 @@ access to some functions.
 ``` r
 library(httr)
 library(dplyr)
-```
-
-    FALSE 
-    FALSE Attaching package: 'dplyr'
-
-    FALSE The following objects are masked from 'package:stats':
-    FALSE 
-    FALSE     filter, lag
-
-    FALSE The following objects are masked from 'package:base':
-    FALSE 
-    FALSE     intersect, setdiff, setequal, union
-
-``` r
 library(jsonlite)
 library(tidyverse)
-```
-
-    FALSE -- Attaching packages --------------------------------------------------------- tidyverse 1.3.1 --
-
-    FALSE v ggplot2 3.3.5     v purrr   0.3.4
-    FALSE v tibble  3.1.6     v stringr 1.4.0
-    FALSE v tidyr   1.2.0     v forcats 0.5.1
-    FALSE v readr   2.1.2
-
-    FALSE -- Conflicts ------------------------------------------------------------ tidyverse_conflicts() --
-    FALSE x dplyr::filter()  masks stats::filter()
-    FALSE x purrr::flatten() masks jsonlite::flatten()
-    FALSE x dplyr::lag()     masks stats::lag()
-
-``` r
 library(lubridate)
-```
-
-    FALSE 
-    FALSE Attaching package: 'lubridate'
-
-    FALSE The following objects are masked from 'package:base':
-    FALSE 
-    FALSE     date, intersect, setdiff, union
-
-``` r
 library(knitr)
 ```
 
@@ -407,18 +368,18 @@ june
 ```
 
     ## # A tibble: 68 x 9
-    ##    date       idData  nameData       magData diamMin diamMax hazardData diamRange diamRangeCatego~
-    ##    <date>     <chr>   <chr>            <dbl>   <dbl>   <dbl> <lgl>          <dbl> <ord>           
-    ##  1 2022-06-01 2163692 163692 (2003 ~    18.3  1943.   4345.  FALSE         2402.  high            
-    ##  2 2022-06-01 2510529 510529 (2012 ~    21.7   399.    891.  TRUE           493.  high            
-    ##  3 2022-06-01 2523813 523813 (2008 ~    20.6   646.   1446.  TRUE           799.  high            
-    ##  4 2022-06-01 3092391 (2001 UX4)        19.3  1204.   2692.  FALSE         1488.  high            
-    ##  5 2022-06-01 3370167 (2007 EF)         21.4   458.   1023.  TRUE           566.  high            
-    ##  6 2022-06-01 3475231 (2009 VP)         22.7   252.    562.  FALSE          311.  medium          
-    ##  7 2022-06-01 3666539 (2014 FS32)       26.6    41.7    93.3 FALSE           51.6 low             
-    ##  8 2022-06-01 3734563 (2015 VP105)      25.6    66.2   148.  FALSE           81.8 medium          
-    ##  9 2022-06-01 3735684 (2015 XQ1)        23.4   182.    407.  FALSE          225.  medium          
-    ## 10 2022-06-01 3746620 (2016 ED156)      23.4   182.    407.  FALSE          225.  medium          
+    ##    date       idData  nameData           magData diamMin diamMax hazardData diamRange diamRangeCategory
+    ##    <date>     <chr>   <chr>                <dbl>   <dbl>   <dbl> <lgl>          <dbl> <ord>            
+    ##  1 2022-06-01 2163692 163692 (2003 CY18)    18.3  1943.   4345.  FALSE         2402.  high             
+    ##  2 2022-06-01 2510529 510529 (2012 EY11)    21.7   399.    891.  TRUE           493.  high             
+    ##  3 2022-06-01 2523813 523813 (2008 VB1)     20.6   646.   1446.  TRUE           799.  high             
+    ##  4 2022-06-01 3092391 (2001 UX4)            19.3  1204.   2692.  FALSE         1488.  high             
+    ##  5 2022-06-01 3370167 (2007 EF)             21.4   458.   1023.  TRUE           566.  high             
+    ##  6 2022-06-01 3475231 (2009 VP)             22.7   252.    562.  FALSE          311.  medium           
+    ##  7 2022-06-01 3666539 (2014 FS32)           26.6    41.7    93.3 FALSE           51.6 low              
+    ##  8 2022-06-01 3734563 (2015 VP105)          25.6    66.2   148.  FALSE           81.8 medium           
+    ##  9 2022-06-01 3735684 (2015 XQ1)            23.4   182.    407.  FALSE          225.  medium           
+    ## 10 2022-06-01 3746620 (2016 ED156)          23.4   182.    407.  FALSE          225.  medium           
     ## # ... with 58 more rows
 
 ## Tables
@@ -432,12 +393,15 @@ but it appears that there’s a little over 1 Hazardous asteroid per day,
 on average.
 
 ``` r
-table(june$hazardData)
+knitr::kable(table(june$hazardData), caption = paste("Counts for Hazardous and Non-Hazardous Asteroids"))
 ```
 
-    ## 
-    ## FALSE  TRUE 
-    ##    59     9
+| Var1  | Freq |
+|:------|-----:|
+| FALSE |   59 |
+| TRUE  |    9 |
+
+Counts for Hazardous and Non-Hazardous Asteroids
 
 Here I created a two-way contingency table to look at how many asteroids
 were potentially Hazardous or not on each date. June 1st and June 6th
@@ -445,18 +409,20 @@ had more Hazardous asteroids than all of the other days but those days
 had significantly more near-earth asteroids to begin with.
 
 ``` r
-table(june$date, june$hazardData)
+knitr::kable(table(june$date, june$hazardData), caption = paste("Counts of Hazardous and Non-Hazardous Asteroids Each Day"))
 ```
 
-    ##             
-    ##              FALSE TRUE
-    ##   2022-06-01    14    4
-    ##   2022-06-02     4    0
-    ##   2022-06-03     8    1
-    ##   2022-06-04     9    0
-    ##   2022-06-05     6    0
-    ##   2022-06-06    13    3
-    ##   2022-06-07     5    1
+|            | FALSE | TRUE |
+|:-----------|------:|-----:|
+| 2022-06-01 |    14 |    4 |
+| 2022-06-02 |     4 |    0 |
+| 2022-06-03 |     8 |    1 |
+| 2022-06-04 |     9 |    0 |
+| 2022-06-05 |     6 |    0 |
+| 2022-06-06 |    13 |    3 |
+| 2022-06-07 |     5 |    1 |
+
+Counts of Hazardous and Non-Hazardous Asteroids Each Day
 
 Here I created a three-way contingency table to look at how many
 asteroids were potentially Hazardous or not on each date depending on if
@@ -466,44 +432,56 @@ asteroids have a high estimated Diameter Range. I wonder why we can’t
 estimate the size of potentially hazardous asteroids?
 
 ``` r
-table(june$date, june$hazardData, june$diamRangeCategory)
+knitr::kable(table(june$date, june$hazardData, june$diamRangeCategory), caption = paste("Counts of Hazardous and Non-Hazardous Asteroids Each Day for High, Medium, and Low Estimated Diameter Range"))
 ```
 
-    ## , ,  = high
-    ## 
-    ##             
-    ##              FALSE TRUE
-    ##   2022-06-01     2    4
-    ##   2022-06-02     0    0
-    ##   2022-06-03     2    1
-    ##   2022-06-04     1    0
-    ##   2022-06-05     1    0
-    ##   2022-06-06     3    3
-    ##   2022-06-07     0    0
-    ## 
-    ## , ,  = medium
-    ## 
-    ##             
-    ##              FALSE TRUE
-    ##   2022-06-01     9    0
-    ##   2022-06-02     2    0
-    ##   2022-06-03     4    0
-    ##   2022-06-04     4    0
-    ##   2022-06-05     2    0
-    ##   2022-06-06     8    0
-    ##   2022-06-07     4    1
-    ## 
-    ## , ,  = low
-    ## 
-    ##             
-    ##              FALSE TRUE
-    ##   2022-06-01     3    0
-    ##   2022-06-02     2    0
-    ##   2022-06-03     2    0
-    ##   2022-06-04     4    0
-    ##   2022-06-05     3    0
-    ##   2022-06-06     2    0
-    ##   2022-06-07     1    0
+| Var1       | Var2  | Var3   | Freq |
+|:-----------|:------|:-------|-----:|
+| 2022-06-01 | FALSE | high   |    2 |
+| 2022-06-02 | FALSE | high   |    0 |
+| 2022-06-03 | FALSE | high   |    2 |
+| 2022-06-04 | FALSE | high   |    1 |
+| 2022-06-05 | FALSE | high   |    1 |
+| 2022-06-06 | FALSE | high   |    3 |
+| 2022-06-07 | FALSE | high   |    0 |
+| 2022-06-01 | TRUE  | high   |    4 |
+| 2022-06-02 | TRUE  | high   |    0 |
+| 2022-06-03 | TRUE  | high   |    1 |
+| 2022-06-04 | TRUE  | high   |    0 |
+| 2022-06-05 | TRUE  | high   |    0 |
+| 2022-06-06 | TRUE  | high   |    3 |
+| 2022-06-07 | TRUE  | high   |    0 |
+| 2022-06-01 | FALSE | medium |    9 |
+| 2022-06-02 | FALSE | medium |    2 |
+| 2022-06-03 | FALSE | medium |    4 |
+| 2022-06-04 | FALSE | medium |    4 |
+| 2022-06-05 | FALSE | medium |    2 |
+| 2022-06-06 | FALSE | medium |    8 |
+| 2022-06-07 | FALSE | medium |    4 |
+| 2022-06-01 | TRUE  | medium |    0 |
+| 2022-06-02 | TRUE  | medium |    0 |
+| 2022-06-03 | TRUE  | medium |    0 |
+| 2022-06-04 | TRUE  | medium |    0 |
+| 2022-06-05 | TRUE  | medium |    0 |
+| 2022-06-06 | TRUE  | medium |    0 |
+| 2022-06-07 | TRUE  | medium |    1 |
+| 2022-06-01 | FALSE | low    |    3 |
+| 2022-06-02 | FALSE | low    |    2 |
+| 2022-06-03 | FALSE | low    |    2 |
+| 2022-06-04 | FALSE | low    |    4 |
+| 2022-06-05 | FALSE | low    |    3 |
+| 2022-06-06 | FALSE | low    |    2 |
+| 2022-06-07 | FALSE | low    |    1 |
+| 2022-06-01 | TRUE  | low    |    0 |
+| 2022-06-02 | TRUE  | low    |    0 |
+| 2022-06-03 | TRUE  | low    |    0 |
+| 2022-06-04 | TRUE  | low    |    0 |
+| 2022-06-05 | TRUE  | low    |    0 |
+| 2022-06-06 | TRUE  | low    |    0 |
+| 2022-06-07 | TRUE  | low    |    0 |
+
+Counts of Hazardous and Non-Hazardous Asteroids Each Day for High,
+Medium, and Low Estimated Diameter Range
 
 Here I looked at the spread of the range of the estimated Diameter in
 feet. As you can see, there is a big difference from the minimum to the
@@ -594,7 +572,7 @@ g + geom_bar(aes(fill = hazardData), position = "dodge") +
   scale_fill_discrete(name = "Hazardous", labels = c("No", "Yes"))
 ```
 
-![](~/Images/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 Below is a histogram of the frequency of Absolute Aagnitude of the
 asteroids. It appears that this data has a normal distribution, which is
@@ -606,7 +584,7 @@ g2 + geom_histogram(color = "black", fill = "red", size = 1, binwidth = 2) +
   labs(x = "Magnitude (H)", title = "Histogram of Asteroid's Absolute Magnitude")
 ```
 
-![](~/Images/unnamed-chunk-15-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 Below is a histogram with a kernel smoother layered on top. This graph
 is showing the density of Absolute Magnitude categorized by Diameter
@@ -620,7 +598,7 @@ g2 + geom_histogram(aes(y = ..density.., fill = diamRangeCategory), binwidth = 1
   scale_fill_discrete(name = "Diameter Range (ft)", labels = c("High", "Medium", "Low"))
 ```
 
-![](~/Images/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 Below is a scatter plot of asteroid Absolute Magnitude by Diameter
 Range. There appears to be a negative exponential trend with very little
@@ -634,7 +612,7 @@ g3 + geom_point() +
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-![](~/Images/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 Here I was having a little fun with the data points in the graph above.
 Each data point is its ID number. It’s not a very appealing graph as
@@ -646,7 +624,7 @@ g3 + geom_text(aes(label = idData, angle = 90)) +
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-![](~/Images/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 Below is a boxplot of Absolute Magnitude of Hazardous and Non-Hazardous
 asteroids. It appears that Absolute Magnitude of asteroids are larger
@@ -659,4 +637,4 @@ g4 + geom_boxplot(fill = "blue", alpha = 0.5) +
   labs(x = "Potentially Hazardous", y = "Absolute Magnitude (H)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
 ```
 
-![](~/Images/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
