@@ -36,9 +36,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # This fixes comment made by line 368
 options(dplyr.summarise.inform = FALSE)
-
-# This saves the plots created to the images file so they will load in gitHub
-#knitr::opts_chunk$set(fig.path = "~/Images/")
 ```
 
 # NASA API Interaction Functions
