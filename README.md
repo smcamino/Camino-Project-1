@@ -4,7 +4,7 @@ Steph Camino
 2022-06-08
 
 Welcome! This is project 1 for St558 at NC State! Here you will see a
-vignette I have created about contacting a [NASA
+vignette I have created about contacting [NASA
 API](https://api.nasa.gov/index.html#browseAPI) using functions I wrote
 to query, parse, and return data. At the end will be a small exploratory
 analysis on the data I returned from the functions I created.
@@ -45,9 +45,48 @@ access to some functions.
 ``` r
 library(httr)
 library(dplyr)
+```
+
+    FALSE 
+    FALSE Attaching package: 'dplyr'
+
+    FALSE The following objects are masked from 'package:stats':
+    FALSE 
+    FALSE     filter, lag
+
+    FALSE The following objects are masked from 'package:base':
+    FALSE 
+    FALSE     intersect, setdiff, setequal, union
+
+``` r
 library(jsonlite)
 library(tidyverse)
+```
+
+    FALSE -- Attaching packages --------------------------------------------------------- tidyverse 1.3.1 --
+
+    FALSE v ggplot2 3.3.5     v purrr   0.3.4
+    FALSE v tibble  3.1.6     v stringr 1.4.0
+    FALSE v tidyr   1.2.0     v forcats 0.5.1
+    FALSE v readr   2.1.2
+
+    FALSE -- Conflicts ------------------------------------------------------------ tidyverse_conflicts() --
+    FALSE x dplyr::filter()  masks stats::filter()
+    FALSE x purrr::flatten() masks jsonlite::flatten()
+    FALSE x dplyr::lag()     masks stats::lag()
+
+``` r
 library(lubridate)
+```
+
+    FALSE 
+    FALSE Attaching package: 'lubridate'
+
+    FALSE The following objects are masked from 'package:base':
+    FALSE 
+    FALSE     date, intersect, setdiff, union
+
+``` r
 library(knitr)
 ```
 
@@ -368,19 +407,19 @@ june
 ```
 
     ## # A tibble: 68 x 9
-    ##    date       idData  nameData magData diamMin diamMax hazardData diamRange
-    ##    <date>     <chr>   <chr>      <dbl>   <dbl>   <dbl> <lgl>          <dbl>
-    ##  1 2022-06-01 2163692 163692 ~    18.3  1943.   4345.  FALSE         2402. 
-    ##  2 2022-06-01 2510529 510529 ~    21.7   399.    891.  TRUE           493. 
-    ##  3 2022-06-01 2523813 523813 ~    20.6   646.   1446.  TRUE           799. 
-    ##  4 2022-06-01 3092391 (2001 U~    19.3  1204.   2692.  FALSE         1488. 
-    ##  5 2022-06-01 3370167 (2007 E~    21.4   458.   1023.  TRUE           566. 
-    ##  6 2022-06-01 3475231 (2009 V~    22.7   252.    562.  FALSE          311. 
-    ##  7 2022-06-01 3666539 (2014 F~    26.6    41.7    93.3 FALSE           51.6
-    ##  8 2022-06-01 3734563 (2015 V~    25.6    66.2   148.  FALSE           81.8
-    ##  9 2022-06-01 3735684 (2015 X~    23.4   182.    407.  FALSE          225. 
-    ## 10 2022-06-01 3746620 (2016 E~    23.4   182.    407.  FALSE          225. 
-    ## # ... with 58 more rows, and 1 more variable: diamRangeCategory <ord>
+    ##    date       idData  nameData       magData diamMin diamMax hazardData diamRange diamRangeCatego~
+    ##    <date>     <chr>   <chr>            <dbl>   <dbl>   <dbl> <lgl>          <dbl> <ord>           
+    ##  1 2022-06-01 2163692 163692 (2003 ~    18.3  1943.   4345.  FALSE         2402.  high            
+    ##  2 2022-06-01 2510529 510529 (2012 ~    21.7   399.    891.  TRUE           493.  high            
+    ##  3 2022-06-01 2523813 523813 (2008 ~    20.6   646.   1446.  TRUE           799.  high            
+    ##  4 2022-06-01 3092391 (2001 UX4)        19.3  1204.   2692.  FALSE         1488.  high            
+    ##  5 2022-06-01 3370167 (2007 EF)         21.4   458.   1023.  TRUE           566.  high            
+    ##  6 2022-06-01 3475231 (2009 VP)         22.7   252.    562.  FALSE          311.  medium          
+    ##  7 2022-06-01 3666539 (2014 FS32)       26.6    41.7    93.3 FALSE           51.6 low             
+    ##  8 2022-06-01 3734563 (2015 VP105)      25.6    66.2   148.  FALSE           81.8 medium          
+    ##  9 2022-06-01 3735684 (2015 XQ1)        23.4   182.    407.  FALSE          225.  medium          
+    ## 10 2022-06-01 3746620 (2016 ED156)      23.4   182.    407.  FALSE          225.  medium          
+    ## # ... with 58 more rows
 
 ## Tables
 
@@ -521,15 +560,10 @@ zero Hazardous asteroids with low diameter range. But low diameter
 range, Non-Hazardous asteroids have larger mean and median Absolute
 Magnitudes than the other categories.
 
-# **FIX THE COMMENT IN THIS LINE OF CODE!!!**
-
 ``` r
 june %>% group_by(diamRangeCategory, hazardData) %>%
      summarise(avg = mean(magData), med = median(magData), var = var(magData))
 ```
-
-    ## `summarise()` has grouped output by 'diamRangeCategory'. You can override
-    ## using the `.groups` argument.
 
     ## # A tibble: 5 x 5
     ## # Groups:   diamRangeCategory [3]
@@ -560,7 +594,7 @@ g + geom_bar(aes(fill = hazardData), position = "dodge") +
   scale_fill_discrete(name = "Hazardous", labels = c("No", "Yes"))
 ```
 
-![](~/images/unnamed-chunk-73-1.png)<!-- -->
+![](~/Images/unnamed-chunk-14-1.png)<!-- -->
 
 Below is a histogram of the frequency of Absolute Aagnitude of the
 asteroids. It appears that this data has a normal distribution, which is
@@ -572,7 +606,7 @@ g2 + geom_histogram(color = "black", fill = "red", size = 1, binwidth = 2) +
   labs(x = "Magnitude (H)", title = "Histogram of Asteroid's Absolute Magnitude")
 ```
 
-![](~/images/unnamed-chunk-74-1.png)<!-- -->
+![](~/Images/unnamed-chunk-15-1.png)<!-- -->
 
 Below is a histogram with a kernel smoother layered on top. This graph
 is showing the density of Absolute Magnitude categorized by Diameter
@@ -586,25 +620,21 @@ g2 + geom_histogram(aes(y = ..density.., fill = diamRangeCategory), binwidth = 1
   scale_fill_discrete(name = "Diameter Range (ft)", labels = c("High", "Medium", "Low"))
 ```
 
-![](~/images/unnamed-chunk-75-1.png)<!-- -->
+![](~/Images/unnamed-chunk-16-1.png)<!-- -->
 
 Below is a scatter plot of asteroid Absolute Magnitude by Diameter
 Range. There appears to be a negative exponential trend with very little
 variability.
 
-# **FIX THE COMMENT IN THIS LINE OF CODE!!!**
-
 ``` r
 g3 <- ggplot(june, aes(x = magData, y = diamRange))
 
 g3 + geom_point() + 
-  geom_smooth() + 
+  geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-    ## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
-
-![](~/images/unnamed-chunk-76-1.png)<!-- -->
+![](~/Images/unnamed-chunk-17-1.png)<!-- -->
 
 Here I was having a little fun with the data points in the graph above.
 Each data point is its ID number. It’s not a very appealing graph as
@@ -616,7 +646,7 @@ g3 + geom_text(aes(label = idData, angle = 90)) +
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-![](~/images/unnamed-chunk-77-1.png)<!-- -->
+![](~/Images/unnamed-chunk-18-1.png)<!-- -->
 
 Below is a boxplot of Absolute Magnitude of Hazardous and Non-Hazardous
 asteroids. It appears that Absolute Magnitude of asteroids are larger
@@ -629,4 +659,4 @@ g4 + geom_boxplot(fill = "blue", alpha = 0.5) +
   labs(x = "Potentially Hazardous", y = "Absolute Magnitude (H)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
 ```
 
-![](~/images/unnamed-chunk-78-1.png)<!-- -->
+![](~/Images/unnamed-chunk-19-1.png)<!-- -->
