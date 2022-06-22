@@ -368,19 +368,20 @@ june
 ```
 
     ## # A tibble: 68 x 9
-    ##    date       idData  nameData           magData diamMin diamMax hazardData diamRange diamRangeCategory
-    ##    <date>     <chr>   <chr>                <dbl>   <dbl>   <dbl> <lgl>          <dbl> <ord>            
-    ##  1 2022-06-01 2163692 163692 (2003 CY18)    18.3  1943.   4345.  FALSE         2402.  high             
-    ##  2 2022-06-01 2510529 510529 (2012 EY11)    21.7   399.    891.  TRUE           493.  high             
-    ##  3 2022-06-01 2523813 523813 (2008 VB1)     20.6   646.   1446.  TRUE           799.  high             
-    ##  4 2022-06-01 3092391 (2001 UX4)            19.3  1204.   2692.  FALSE         1488.  high             
-    ##  5 2022-06-01 3370167 (2007 EF)             21.4   458.   1023.  TRUE           566.  high             
-    ##  6 2022-06-01 3475231 (2009 VP)             22.7   252.    562.  FALSE          311.  medium           
-    ##  7 2022-06-01 3666539 (2014 FS32)           26.6    41.7    93.3 FALSE           51.6 low              
-    ##  8 2022-06-01 3734563 (2015 VP105)          25.6    66.2   148.  FALSE           81.8 medium           
-    ##  9 2022-06-01 3735684 (2015 XQ1)            23.4   182.    407.  FALSE          225.  medium           
-    ## 10 2022-06-01 3746620 (2016 ED156)          23.4   182.    407.  FALSE          225.  medium           
-    ## # ... with 58 more rows
+    ##    date       idData  nameData       magData diamMin diamMax hazardData
+    ##    <date>     <chr>   <chr>            <dbl>   <dbl>   <dbl> <lgl>     
+    ##  1 2022-06-01 2163692 163692 (2003 ~    18.3  1943.   4345.  FALSE     
+    ##  2 2022-06-01 2510529 510529 (2012 ~    21.7   399.    891.  TRUE      
+    ##  3 2022-06-01 2523813 523813 (2008 ~    20.6   646.   1446.  TRUE      
+    ##  4 2022-06-01 3092391 (2001 UX4)        19.3  1204.   2692.  FALSE     
+    ##  5 2022-06-01 3370167 (2007 EF)         21.4   458.   1023.  TRUE      
+    ##  6 2022-06-01 3475231 (2009 VP)         22.7   252.    562.  FALSE     
+    ##  7 2022-06-01 3666539 (2014 FS32)       26.6    41.7    93.3 FALSE     
+    ##  8 2022-06-01 3734563 (2015 VP105)      25.6    66.2   148.  FALSE     
+    ##  9 2022-06-01 3735684 (2015 XQ1)        23.4   182.    407.  FALSE     
+    ## 10 2022-06-01 3746620 (2016 ED156)      23.4   182.    407.  FALSE     
+    ## # ... with 58 more rows, and 2 more variables: diamRange <dbl>,
+    ## #   diamRangeCategory <ord>
 
 ## Tables
 
@@ -572,7 +573,7 @@ g + geom_bar(aes(fill = hazardData), position = "dodge") +
   scale_fill_discrete(name = "Hazardous", labels = c("No", "Yes"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 Below is a histogram of the frequency of Absolute Aagnitude of the
 asteroids. It appears that this data has a normal distribution, which is
@@ -584,7 +585,7 @@ g2 + geom_histogram(color = "black", fill = "red", size = 1, binwidth = 2) +
   labs(x = "Magnitude (H)", title = "Histogram of Asteroid's Absolute Magnitude")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 Below is a histogram with a kernel smoother layered on top. This graph
 is showing the density of Absolute Magnitude categorized by Diameter
@@ -598,7 +599,7 @@ g2 + geom_histogram(aes(y = ..density.., fill = diamRangeCategory), binwidth = 1
   scale_fill_discrete(name = "Diameter Range (ft)", labels = c("High", "Medium", "Low"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 Below is a scatter plot of asteroid Absolute Magnitude by Diameter
 Range. There appears to be a negative exponential trend with very little
@@ -612,7 +613,7 @@ g3 + geom_point() +
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 Here I was having a little fun with the data points in the graph above.
 Each data point is its ID number. It’s not a very appealing graph as
@@ -624,7 +625,7 @@ g3 + geom_text(aes(label = idData, angle = 90)) +
   labs(x = "Absolute Magnitude (H)", y = "Diameter Range (ft)", title = "Asteroid Magnitude by Range") 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 Below is a boxplot of Absolute Magnitude of Hazardous and Non-Hazardous
 asteroids. It appears that Absolute Magnitude of asteroids are larger
@@ -637,4 +638,4 @@ g4 + geom_boxplot(fill = "blue", alpha = 0.5) +
   labs(x = "Potentially Hazardous", y = "Absolute Magnitude (H)", title = "Is There a Relationship in Asteroid Magnitude and if it's Potentially Dangerous?")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
